@@ -22,8 +22,13 @@ class HtmlRosterParsingService implements RosterParsingServiceInterface
     {
         $html = new HTML5();
         $html = $html->load($file);
-        $yearAndMonth = $this->getYearAndMonth($html);
         $table = $html->getElementsByTagName('table')->item(0);
+
+        if ($table == null) {
+            return [];
+        }
+
+        $yearAndMonth = $this->getYearAndMonth($html);
         $extractedData = [];
         $dataRows = $table->getElementsByTagName('tr');
 
@@ -42,7 +47,7 @@ class HtmlRosterParsingService implements RosterParsingServiceInterface
                     case 'type':
                         $rowData['type'] = $this->getType($td->textContent);
 
-                        if ($rowData['type'] == self::FLIGHT_TYPE) {
+                        if ($rowData['type'] == static::FLIGHT_TYPE) {
                             $rowData['flight_number'] = $td->textContent;
                         } else {
                             $rowData['flight_number'] = null;
@@ -72,12 +77,12 @@ class HtmlRosterParsingService implements RosterParsingServiceInterface
 
     private function getType($type)
     {
-        if (preg_match(self::FLIGHT_PATTERN, $type)) {
-            return self::FLIGHT_TYPE;
-        } elseif (in_array($type, self::ALLOWED_ACTIVITY_TYPES)) {
+        if (preg_match(static::FLIGHT_PATTERN, $type)) {
+            return static::FLIGHT_TYPE;
+        } elseif (in_array($type, static::ALLOWED_ACTIVITY_TYPES)) {
             return $type;
         } else {
-            return self::UNKNOWN_TYPE;
+            return static::UNKNOWN_TYPE;
         }
     }
 

@@ -20,7 +20,7 @@ class HtmlRosterParsingServiceTest extends TestCase
                 "end_time" => "2022-01-0 09:35"
             ]
         ];
-        $actualData = $rosterParser->parseRoster(__DIR__ . '/htmlRosterTestFiles/valid_roster_file.html');
+        $actualData = $rosterParser->parseRoster(__DIR__ . '/../htmlRosterTestFiles/valid_roster_file.html');
         $this->assertEquals($expectedData, $actualData);
     }
 
@@ -28,7 +28,7 @@ class HtmlRosterParsingServiceTest extends TestCase
     {
         $rosterParser = new HtmlRosterParsingService();
         $expectedData = [];
-        $actualData = $rosterParser->parseRoster(__DIR__ . '/htmlRosterTestFiles/empty_roster_file.html');
+        $actualData = $rosterParser->parseRoster(__DIR__ . '/../htmlRosterTestFiles/empty_roster_file.html');
         $this->assertEquals($expectedData, $actualData);
     }
 }

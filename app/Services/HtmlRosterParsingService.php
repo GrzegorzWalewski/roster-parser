@@ -7,7 +7,7 @@ use Masterminds\HTML5;
 
 class HtmlRosterParsingService implements RosterParsingServiceInterface
 {
-    public const COLUMNS_TO_EXTRACT = [
+    private const COLUMNS_TO_EXTRACT = [
         'lineLeft activitytablerow-date' => 'date',
         'activitytablerow-activity' => 'type',
         'activitytablerow-fromstn' => 'start_location',
@@ -16,15 +16,15 @@ class HtmlRosterParsingService implements RosterParsingServiceInterface
         'activitytablerow-stautc' => 'end_time'
     ];
 
+    private const PERIOD_SELECT_ID = 'ctl00_Main_periodSelect';
+
     public function parseRoster($file): array
     {
         $html = new HTML5();
         $html = $html->load($file);
-        
         $yearAndMonth = $this->getYearAndMonth($html);
         $table = $html->getElementsByTagName('table')->item(0);
-
-        $parsedData = [];
+        $extractedData = [];
         $dataRows = $table->getElementsByTagName('tr');
 
         for ($i = 1; $i < $dataRows->length; $i++) {
@@ -42,16 +42,18 @@ class HtmlRosterParsingService implements RosterParsingServiceInterface
                     case 'type':
                         $rowData['type'] = $this->getType($td->textContent);
 
-                        if ($rowData['type'] == 'FLT') {
+                        if ($rowData['type'] == self::FLIGHT_TYPE) {
                             $rowData['flight_number'] = $td->textContent;
                         } else {
                             $rowData['flight_number'] = null;
                         }
+
                         break;
                     case 'date':
                         if ($td->textContent != null) {
                             $day = $this->getDay($td->textContent);
                         }
+
                         break;
                     case 'start_time':
                     case 'end_time':
@@ -71,17 +73,17 @@ class HtmlRosterParsingService implements RosterParsingServiceInterface
     private function getType($type)
     {
         if (preg_match(self::FLIGHT_PATTERN, $type)) {
-            return 'FLT';
+            return self::FLIGHT_TYPE;
         } elseif (in_array($type, self::ALLOWED_ACTIVITY_TYPES)) {
             return $type;
         } else {
-            return 'UNK';
+            return self::UNKNOWN_TYPE;
         }
     }
 
     private function getYearAndMonth($html): string
     {
-        $periodSelect = $html->getElementById('ctl00_Main_periodSelect');
+        $periodSelect = $html->getElementById(self::PERIOD_SELECT_ID);
 
         foreach ($periodSelect->getElementsByTagName('option') as $option) {
             if ($option->hasAttribute('selected')) {

@@ -12,6 +12,8 @@ interface RosterParsingServiceInterface
         'CI',
         'CO'
     ];
+    public const FLIGHT_TYPE = 'FLT';
+    public const UNKNOWN_TYPE = 'UNK';
 
     public const FLIGHT_PATTERN = '/^[A-Za-z]{2}\d*$/';
 

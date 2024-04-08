@@ -16,7 +16,4 @@ use App\Http\Controllers\EventsController;
 */
 
 Route::get('/events', [EventsController::class, 'getEvents']);
-// Route::get('/flights/next-week', 'EventController@getFlightsForNextWeek');
-// Route::get('/standby/next-week', 'EventController@getStandbyForNextWeek');
-// Route::get('/flights/{location}', 'EventController@getFlightsByLocation');
 Route::post('/roster/upload', [EventsController::class, 'uploadRoster']);

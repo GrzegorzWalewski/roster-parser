@@ -19,8 +19,16 @@ class EventsController extends Controller
         Events::insert($parsedData);
     }
 
-    public function getEvents()
+    public function getEvents(Request $request)
     {
+        $validated = $request->validate([
+            'type' => 'string|size:3',
+            'start_location' => 'string|size:3',
+            'end_location' => 'string|size:3',
+            'start_time' => 'numeric',
+            'end_time' => 'numeric',
+        ]);
 
+        return Events::where($validated)->get();
     }
 }

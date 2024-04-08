@@ -8,6 +8,7 @@ use Masterminds\HTML5;
 class HtmlRosterParsingService implements RosterParsingServiceInterface
 {
     public const COLUMNS_TO_EXTRACT = [
+        'lineLeft activitytablerow-date' => 'date',
         'activitytablerow-activity' => 'type',
         'activitytablerow-fromstn' => 'start_location',
         'activitytablerow-tostn' => 'end_location',
@@ -19,6 +20,8 @@ class HtmlRosterParsingService implements RosterParsingServiceInterface
     {
         $html = new HTML5();
         $html = $html->load($file);
+        
+        $yearAndMonth = $this->getYearAndMonth($html);
         $table = $html->getElementsByTagName('table')->item(0);
 
         $parsedData = [];
@@ -35,17 +38,27 @@ class HtmlRosterParsingService implements RosterParsingServiceInterface
                     continue;
                 }
 
-                if (self::COLUMNS_TO_EXTRACT[$key] == 'type')
-                {
-                    $rowData['type'] = $this->getType($td->textContent);
+                switch (self::COLUMNS_TO_EXTRACT[$key]) {
+                    case 'type':
+                        $rowData['type'] = $this->getType($td->textContent);
 
-                    if ($rowData['type'] == 'FLT') {
-                        $rowData['flight_number'] = $td->textContent;
-                    } else {
-                        $rowData['flight_number'] = null;
-                    }
-                } else {
-                    $rowData[self::COLUMNS_TO_EXTRACT[$key]] = $td->textContent;
+                        if ($rowData['type'] == 'FLT') {
+                            $rowData['flight_number'] = $td->textContent;
+                        } else {
+                            $rowData['flight_number'] = null;
+                        }
+                        break;
+                    case 'date':
+                        if ($td->textContent != null) {
+                            $day = $this->getDay($td->textContent);
+                        }
+                        break;
+                    case 'start_time':
+                    case 'end_time':
+                        $rowData[self::COLUMNS_TO_EXTRACT[$key]] = $yearAndMonth . '-' . $day . ' ' . $this->formatTime($td->textContent);
+                        break;
+                    default:
+                        $rowData[self::COLUMNS_TO_EXTRACT[$key]] = $td->textContent;
                 }
             }
 
@@ -64,5 +77,29 @@ class HtmlRosterParsingService implements RosterParsingServiceInterface
         } else {
             return 'UNK';
         }
+    }
+
+    private function getYearAndMonth($html): string
+    {
+        $periodSelect = $html->getElementById('ctl00_Main_periodSelect');
+
+        foreach ($periodSelect->getElementsByTagName('option') as $option) {
+            if ($option->hasAttribute('selected')) {
+                $selectedValue = $option->getAttribute('value');
+                break;
+            }
+        }
+
+        return substr($selectedValue, 0, 7);
+    }
+
+    private function getDay($dayString): int
+    {
+        return (int)substr($dayString, -2);
+    }
+
+    private function formatTime($timeString): string
+    {
+        return substr($timeString, 0, 2) . ':' . substr($timeString, 2, 2);
     }
 }

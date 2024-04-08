@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\EventsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::get('/events', [EventsController::class, 'getEvents']);
+// Route::get('/flights/next-week', 'EventController@getFlightsForNextWeek');
+// Route::get('/standby/next-week', 'EventController@getStandbyForNextWeek');
+// Route::get('/flights/{location}', 'EventController@getFlightsByLocation');
+Route::post('/roster/upload', [EventsController::class, 'uploadRoster']);
